@@ -9,55 +9,52 @@
 #include "ConfigChip.h"
 #include "type.h"
 
-static CallBack _callbackTX[2] = {NULL, NULL};
-static CallBack _callbackRX[2] = {NULL, NULL};
+static CallBack _callback[3] = {NULL, NULL, NULL};
 
-BOOL subscribe(const isr_config *config)
+void subscribe(const isr_config *config)
 {
     if(config == NULL)
-        return -1;
-    if(config->mode == 0)
-    {
-        if(config->RxHandler == 1){
-            _callbackRX[0]= config->CallBack;
-        }else
-        {
-            _callbackTX[0] = config->CallBack;
+        return;
+    switch(config->module){
+        case RX_UART:{
+            _callback[0] = config->cbFunction;
+            break;
         }
-    }else
-    {
-        if(config->RxHandler == 1){
-            _callbackRX[1]= config->CallBack;
-        }else
-        {
-            _callbackTX[1] = config->CallBack;
+        case RX_SPI:{
+            _callback[1] = config->cbFunction;
+            break;
+        }
+        case RX_I2C:{
+            _callback[2] = config->cbFunction;
+            break;
+        }
+        default:{
+            break;
         }
     }
-    return 0;
 }
 
-BOOL unsubscribe(const isr_config *config)
+void unsubscribe(const isr_config *config)
 {
     if(config == NULL)
-        return -1;
-    if(config->mode == 0)
-    {
-        if(config->RxHandler == 1){
-            _callbackRX[0]= NULL;
-        }else
-        {
-            _callbackTX[0] = NULL;
+        return ;
+    switch(config->module){
+        case RX_UART:{
+            _callback[0] = NULL;
+            break;
         }
-    }else
-    {
-        if(config->RxHandler == 1){
-            _callbackRX[1]= NULL;
-        }else
-        {
-            _callbackTX[1] = NULL;
+        case RX_SPI:{
+            _callback[1] = NULL;
+            break;
+        }
+        case RX_I2C:{
+            _callback[2] = NULL;
+            break;
+        }
+        default:{
+            break;
         }
     }
-    return 0;
 }
 
 
@@ -70,8 +67,8 @@ __interrupt void USCI0TX_ISR(void)
     if(UC0IFG & UCA0TXIFG)
     {
         UC0IE &= ~UCA0TXIE; // Disable USCI_A0 TX interrupt
-        if(_callbackTX[0] != NULL)
-            _callbackTX[0](0);
+//        if(_callbackTX[0] != NULL)
+//            _callbackTX[0](0);
     }
 #endif // end of USCI_A0 interrupt
 
@@ -79,8 +76,8 @@ __interrupt void USCI0TX_ISR(void)
     if( UC0IFG & UCB0TXIFG )
     {
         UC0IE &= ~UCB0TXIE; // Disable USCI_B0 TX interrupt
-        if(_callbackTX[1] != NULL)
-            _callbackTX[1](0);
+//        if(_callbackTX[1] != NULL)
+//            _callbackTX[1](0);
     }
 #endif // end of USCI_B0 interrupt
 }
@@ -95,10 +92,12 @@ __interrupt void USCI0RX_ISR(void)
         const int8_t data = UCA0RXBUF;
         /*Clear the interrupt flag*/
         IFG2 &= ~UCA0RXIFG;
+#ifdef RINGBUFF
         ring_buffer_put(g_rbd1, &data);
-        if(_callbackRX[0] != NULL)
+#endif
+        if(_callback[0] != NULL)
         {
-            _callbackRX[0]((void*)&data);
+            _callback[0]((void*)&data);
         }
     }
 #endif // end of module UCA0
@@ -110,10 +109,12 @@ __interrupt void USCI0RX_ISR(void)
         /*Clear the interrupt flag*/
         IFG2 &= ~UCB0RXIFG;
         const int8_t data = UCB0RXBUF;
+#ifdef RINGBUFF
         ring_buffer_put(g_rbd2, &data);
-        if(_callbackRX[1] != NULL)
+#endif
+        if(_callback[1] != NULL)
         {
-            _callbackRX[1]((void*)&data);
+            _callback[1]((void*)&data);
         }
     }
 #elif defined (I2C_EN)
@@ -130,9 +131,9 @@ __interrupt void USCI0RX_ISR(void)
     IFG2 &= ~UCB0RXIFG;
     const int8_t data = UCB0RXBUF;
     ring_buffer_put(g_rbd2, &data);
-    if(_callbackRX[1] != NULL)
+    if(_callback[2] != NULL)
     {
-        _callbackRX[1]((void*)&data);
+        _callback[2]((void*)&data);
     }
 }
 #endif // end of UCB0 module;

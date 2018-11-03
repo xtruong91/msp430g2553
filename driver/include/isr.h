@@ -19,16 +19,19 @@ extern char g_rbmem1[BUFFER_LENGTH];
 extern rbd_t g_rbd2;
 extern char g_rbmem2[BUFFER_LENGTH];
 
-typedef void (*CallBack)(void *args);
+typedef enum{
+    RX_UART,
+    RX_SPI,
+    RX_I2C
+}EModule;
 
 typedef struct {
-    int8_t mode; // 0: selected default USCA0 module, otherwise USCB0
-    int8_t RxHandler; // default register interrupt routine at RX side;
-    void (*CallBack)(void *arg);
+    EModule module;
+    void (*cbFunction)(void *arg);
 } isr_config;
 
-BOOL subscribe(const isr_config *config);
-BOOL unsubscribe(const isr_config *config);
+void subscribe(const isr_config *config);
+void unsubscribe(const isr_config *config);
 
 
 #endif /* DRIVER_ISR_H_ */

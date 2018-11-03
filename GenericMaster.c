@@ -9,42 +9,42 @@
 #include "clock.h"
 #include "adc.h"
 #include "uart.h"
-#include "pwm.h"
-#include "isr.h"
+#include "bq32000.h"
+#include "hc06.h"
 
 
 #if (BOARD_VERSION == BOARD_VERSION_MASTER)
 
 void isr_uartrx(void *args);
 
+
+
 int main()
 {
     CLKInit(CLK_1MHZ);
 
-    uart_config_t config = {9600};
-    if(uart_init(&config) != 0)
-        return -1;
-    uart_enableInt();
-    uart_puts("Initialize UART successfully! \n");
+//    uart_config_t config = {9600};
+//    if(uart_init(&config) != 0)
+//        return -1;
+//    uart_enableRXInt(isr_uartrx);
+    HC06_init();
+    HC06_send("Initialize UART successfully! \n");
 
     // we have two option 1. handle at routine function or handle with ringbuffer
-//    isr_config isrConfig = {0, 1, isr_uartrx};
-//    subscribe(&isrConfig);
-
     adc_init(CHANNEL_0);
-    uart_puts("Initialize ADC successfully! \n");
+    HC06_send("Initialize ADC successfully! \n");
 
-    //pwm_init();
-    int8_t c;
+    BQ32000_init();
+    HC06_send("Initialized BQ3200! \n ");
+
+    SDateTime sDateTime;
     while(1)
     {
-        //uart_puts("push data up PC \n");
-        c = uart_getchar();
-        if(c != -1)
-        {
-            uart_putchar(c);
-        }
+        sDateTime = BQ32000_readDateTime();
+        uart_putnum(sDateTime.second, 0, 0);
+        HC06_send("\r\n");
         delay_ms(1000);
+        //uart_puts("push data up PC \n");
     }
 }
 

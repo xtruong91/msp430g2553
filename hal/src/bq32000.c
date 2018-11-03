@@ -11,93 +11,39 @@
 
 // Initialize default value for BQ32000
 
+void BQ32000_init(){
+    i2c_config config = {BQ32000,R_100K, MASTER};
+    i2c_init(&config);
 
-static void _reset();
-static int8_t _startRead(int8_t address);
-static int8_t _startWrite(int8_t address, int8_t data);
-static void _stop();
-static int8_t _send(int8_t c);
-const DateTime datetime = {0x30,0x00, 0x00, 0x00, 0x01, 0x11, 0x01, 0x14, 0x10};
+    while(i2c_putc(CALCFG1_REG, 0x40));
 
-BOOL BQ32000_init()
-{
-    i2c_config config = {BQ32000, 1};
-    if(i2c_init(&config) != 0)
-        return -1;
-    _reset();
-    i2c_putc(BQ32000, 0x00);
-    _send(datetime.second);
-    _send(datetime.minute);
-    _send(datetime.hour);
-    _send(datetime.day);
-    _send(datetime.month);
-    _send(datetime.year);
-    _send(datetime.control);
-    _stop();
-    return 0;
-}
-
-int8_t BQ32000_readData(int8_t *buffer)
-{
-    int8_t aux;
-    _reset();
-    _startWrite(BQ32000,0x00);
-    _startRead(BQ32000);
-
-    for(aux = 0; aux < 7; aux++, buffer++){//6
-       *buffer = i2c_getc();
+    while((i2c_getc(CALCFG1_REG) & 0x40) != 0x40){
+        while(i2c_putc(CALCFG1_REG, 0x40));
     }
 
-    UCB0CTL1 |= UCTXNACK;
-    _stop();
-    *buffer = i2c_getc();
-    __delay_cycles(15);//15
-    _stop();
-    return aux;
-}
-int8_t BQ32000_writeData(const int8_t *data, int8_t length);
-
-static void _reset()
-{
-    UCB0CTL1 |= UCSWRST;
-    UCB0CTL0 = UCMST+UCMODE_3+UCSYNC;
-    UCB0CTL1 = UCSSEL_2+UCSWRST;
-    UCB0BR0 = 12;
-    UCB0BR1 = 0;
-    UCB0CTL1 &= ~UCSWRST;
+    while(i2c_putc(SFKEY1_REG, 0x5E));
+    while(i2c_putc(SFKEY2_REG, 0xC7));
+    while(i2c_putc(SFR_REG, 0x01));
 }
 
-static int8_t _startRead(int8_t address)
-{
-    while((UCB0STAT & BUSY) != 0);
-    UCB0I2CSA = address;
-    UCB0CTL1 &=~UCTR;
-    UCB0CTL1 |=UCTXSTT;
-    while((UCB0CTL1  & UCTXSTT) != 0);
-    return ((UCB0STAT & UCNACKIFG) != 0)? 0 : 1;
-}
-static int8_t _startWrite(int8_t address, int8_t data)
-{
-    while((UCB0STAT & BUSY) != 0);
-    UCB0I2CSA = address;
-    UCB0CTL1 |= UCTR + UCTXSTT;
-    UCB0TXBUF = data;
-    while(!(IFG2 & UCB0TXIFG));
-    return ((UCB0STAT & UCNACKIFG) != 0)? 0 : 1;
-}
+SDateTime BQ32000_readDateTime(){
+    uint8_t buffer[8];
+    i2c_gets(SEC_REG, buffer, 8);
 
-static void _stop()
-{
-    while((UCB0STAT & BUSY) != 0);
-    UCB0CTL1 |= UCTXSTP;
-}
+    buffer[1] &= 0x7F;
+    buffer[2] &= 0x7F;
+    buffer[3] &= 0x3F;
+    buffer[5] &= 0x3F;
+    buffer[6] &= 0x1F;
 
-static int8_t _send(int8_t c)
-{
-    while((UCB0STAT & BUSY) != 0);
-    UCB0TXBUF = c;
-    while(!(IFG2 & UCB0TXIFG));
-    return ((UCB0STAT & UCNACKIFG) != 0)? 0 : 1;
+    SDateTime sDateTime;
+    sDateTime.second = ((buffer[1]>>4)*10 +  (buffer[1] & 0x0F));
+    sDateTime.minute = ((buffer[2]>>4)*10 + (buffer[2] & 0x0F));
+    sDateTime.hour   = ((buffer[3]>>4)*10 + (buffer[3] & 0x0F));
+    sDateTime.day    = ((buffer[5]>>4)*10 + (buffer[5] & 0x0F)) ;
+    sDateTime.month  = ((buffer[6]>>4)*10 + (buffer[6] & 0x0F));
+    sDateTime.year   = ((buffer[7]>>4)*10 + (buffer[7] & 0x0F));
+    return sDateTime;
 }
 
 

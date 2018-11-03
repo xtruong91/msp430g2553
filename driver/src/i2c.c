@@ -6,17 +6,19 @@
  */
 
 #include "i2c.h"
+#include "isr.h"
 #include <msp430.h>
 
 static int _transmit(const int8_t dev, const uint8_t *buf, size_t nbytes);
 static int _receive(const int8_t dev, uint8_t *buf, size_t nbytes);
 static int _check_ack(const int8_t dev);
 
+static isr_config isrConfig;
 /**
  * \brief Initialize the I2C peripheral
  * \return 0 on success, -1 otherwise
  */
-BOOL i2c_init(const i2c_config* config)
+void i2c_init(const i2c_config* config)
 {
     P1SEL |= BIT6 + BIT7;                     // Assign I2C pins to USCI_B0
     P1SEL2|= BIT6 + BIT7;                     // Assign I2C pins to USCI_B0
@@ -24,45 +26,137 @@ BOOL i2c_init(const i2c_config* config)
     UCB0CTL1 = UCSWRST;
     UCB0CTL0 = UCMODE_3 | UCSYNC;
 
-    if(config->master == 1)
-    {
-        UCB0CTL0 |= UCMST;
-        UCB0I2CSA = config->address;
+    if(config->mode == MASTER){
+        UCB0CTL0 |= UCMST; // I2C Master, synchronous mode
+        UCB0I2CSA = config->addrSlave; //// Set slave address
     }
-    else
-    {
-        UCB0I2COA = config->address;
+    else{
+        UCB0I2COA = config->addrSlave; //Own Address
         UCB0I2CIE |= UCSTTIE;                     // Enable STT interrupt
     }
     /* Set USCI_B0 to master mode I2C mode */
-
-
-    /**
-     * Configure the baud rate registers for 100kHz when sourcing from SMCLK
-     * where SMCLK = 1MHz
-     *     UCB0BR0 = 12;                             // fSCL = SMCLK/12 = ~100kHz
-           UCB0BR1 = 0;
-     */
-    UCB0BR0 = 10;
-    UCB0BR1 = 0;
-
+    if(config->baudRate == R_400K){
+        UCB0BR0 = 40;                             // fSCL = SMCLK/40 = ~400kHz
+        UCB0BR1 = 0;
+    }else{
+        UCB0BR0 = 12;                             // fSCL = SMCLK/12 = ~100kHz
+        UCB0BR1 = 0;
+    }
     /* Take USCI_B0 out of reset and source clock from SMCLK */
     UCB0CTL1 |= UCSSEL_2;
     UCB0CTL1 &= ~UCSWRST;
-    return 0;
 }
 
-void i2c_enableInt()
+void i2c_enableRxISR(void (*cbRxHandler)(void *args))
 {
     IE2 |= UCB0TXIE;                          // Enable TX interrupt
     __bis_SR_register(GIE);
+    isrConfig.module = RX_I2C;
+    isrConfig.cbFunction = cbRxHandler;
+    subscribe(&isrConfig);
 }
 /*
  * Disable global interrupt
  * */
-void i2c_disableInt()
+void i2c_disableRxISR()
 {
     IE2 &= ~UCB0TXIE;
+    unsubscribe(&isrConfig);
+}
+
+void i2c_setAddress(uint8_t address){
+    UCB0CTL1 |= UCSWRST;
+    UCB0I2CSA = address;                           // Set slave address
+    UCB0CTL1 &= ~UCSWRST;                       // Clear SW reset, resume operation
+}
+
+uint8_t i2c_getc(uint8_t addReg)
+{
+    while (UCB0CTL1 & UCTXSTP);                 // wait for I2C STT set flag
+    UCB0CTL1 |= UCTR + UCTXSTT;                 // I2C TX,START
+
+    while (!(IFG2&UCB0TXIFG));                  // wait for  completing transfer
+    UCB0TXBUF = addReg;                        // the first send address
+
+    while (!(IFG2&UCB0TXIFG));                  // wait for completing
+
+    UCB0CTL1 &= ~UCTR;                      // I2C RX
+    UCB0CTL1 |= UCTXSTT;                    // I2C RESTART
+    IFG2 &= ~UCB0TXIFG;                     // clear USCI_B0 TX flag
+
+    while (UCB0CTL1 & UCTXSTT);             // Cho den khi I2C STT duoc gui di
+    UCB0CTL1 |= UCTXSTP;                    // Gui bit STOP
+    return UCB0RXBUF;
+}
+
+uint8_t i2c_gets(uint8_t addReg,uint8_t* buffer, uint8_t length){
+    unsigned char i=0;
+    while (UCB0CTL1 & UCTXSTP);             // Loop until I2C STT is sent
+    UCB0CTL1 |= UCTR + UCTXSTT;             // I2C TX, start condition
+
+    while (!(IFG2&UCB0TXIFG));
+    IFG2 &= ~UCB0TXIFG;                     // Clear USCI_B0 TX int flag
+    if(UCB0STAT & UCNACKIFG) return UCB0STAT;   //Neu bao loi
+    UCB0TXBUF = addReg;                          // Dia chi luu gia tri Seconds
+
+    while (!(IFG2&UCB0TXIFG));
+    if(UCB0STAT & UCNACKIFG) return UCB0STAT;   //Neu bao loi
+
+    UCB0CTL1 &= ~UCTR;                      // I2C RX
+    UCB0CTL1 |= UCTXSTT;                    // I2C start condition
+    IFG2 &= ~UCB0TXIFG;                     // Clear USCI_B0 TX int flag
+    while (UCB0CTL1 & UCTXSTT);             // Loop until I2C STT is sent
+    for(i=0;i<(length-1);i++)
+    {
+        while (!(IFG2&UCB0RXIFG));
+        IFG2 &= ~UCB0TXIFG;                     // Clear USCI_B0 TX int flag
+        buffer[i] = UCB0RXBUF;
+    }
+    while (!(IFG2&UCB0RXIFG));
+    IFG2 &= ~UCB0TXIFG;                     // Clear USCI_B0 TX int flag
+    UCB0CTL1 |= UCTXSTP;                    // I2C stop condition after 1st TX
+    buffer[length-1] = UCB0RXBUF;
+    IFG2 &= ~UCB0TXIFG;                     // Clear USCI_B0 TX int flag
+    return 0;
+}
+
+uint8_t i2c_putc(uint8_t addreg,const uint8_t data){
+    while (UCB0CTL1 & UCTXSTP);             // Cho den khi tin hieu STT duoc gui xong
+    UCB0CTL1 |= UCTR + UCTXSTT;             // I2C TX, Gui bit START
+
+    while (!(IFG2&UCB0TXIFG));              // Cho cho bit START gui xong
+    if(UCB0STAT & UCNACKIFG) return UCB0STAT;   //Neu bao loi thì thoat khoi ham
+    UCB0TXBUF = addreg;                    // Gui dia chi thanh ghi can ghi
+
+
+    while (!(IFG2&UCB0TXIFG));              // Cho gui xong
+    if(UCB0STAT & UCNACKIFG) return UCB0STAT;   //Neu bao loi thì thoat khoi ham
+    UCB0TXBUF = data;                       // Gui du lieu
+
+    while (!(IFG2&UCB0TXIFG));              // Cho gui xong
+    if(UCB0STAT & UCNACKIFG) return UCB0STAT;   //Neu bao loi thì thoat khoi ham
+    UCB0CTL1 |= UCTXSTP;                    // Gui bit STOP
+    IFG2 &= ~UCB0TXIFG;                     // Xoa co USCI_B0 TX
+    return 0;
+}
+
+void i2c_puts(uint8_t addRegister,const uint8_t *data, uint8_t length)
+{
+    while (UCB0CTL1 & UCTXSTP);                // Loop until I2C STT is sent
+    UCB0CTL1 |= UCTR + UCTXSTT;                // I2C TX, start condition
+
+    while (!(IFG2&UCB0TXIFG));
+    UCB0TXBUF = addRegister;
+
+    while (!(IFG2&UCB0TXIFG));
+    unsigned char i;
+    for( i=0;i<length;i++)
+     {
+        UCB0TXBUF= *(data+i) ;
+        while (!(IFG2&UCB0TXIFG));
+     }
+    UCB0CTL1 |= UCTXSTP;                       // I2C stop condition after 1st TX
+    IFG2 &= ~UCB0TXIFG;                        // Clear USCI_B0 TX int flag
 }
 
 /**
@@ -94,72 +188,9 @@ BOOL i2c_transfer(const int8_t dev, struct i2c_data *data)
     return err;
 }
 
-void i2c_gets(uint8_t addreg,uint8_t* buffer, uint8_t length)
-{
-    while (UCB0CTL1 & UCTXSTP);                // Loop until I2C STT is sent
-    UCB0CTL1 |= UCTR + UCTXSTT;                // I2C TX, start condition
 
-    while (!(IFG2&UCB0TXIFG));
-    UCB0TXBUF = addreg;                        // Address start
 
-    while (!(IFG2&UCB0TXIFG));
 
-    UCB0CTL1 &= ~UCTR;                         // I2C RX
-    UCB0CTL1 |= UCTXSTT;                       // I2C start condition
-    IFG2 &= ~UCB0TXIFG;                        // Clear USCI_B0 TX int flag
-
-    while (UCB0CTL1 & UCTXSTT);                // Loop until I2C STT is sent
-    while (!(IFG2&UCB0RXIFG));
-    unsigned char i;
-    for( i=0;i<=length;i++)
-     {
-       *(buffer+i-1)= UCB0RXBUF;
-        while (!(IFG2&UCB0RXIFG));
-     }
-    UCB0CTL1 |= UCTXSTP;                       // I2C stop condition after 1st TX
-}
-
-void i2c_puts(uint8_t addRegister,const uint8_t *data, uint8_t length)
-{
-    while (UCB0CTL1 & UCTXSTP);                // Loop until I2C STT is sent
-    UCB0CTL1 |= UCTR + UCTXSTT;                // I2C TX, start condition
-
-    while (!(IFG2&UCB0TXIFG));
-    UCB0TXBUF = addRegister;
-
-    while (!(IFG2&UCB0TXIFG));
-    unsigned char i;
-    for( i=0;i<length;i++)
-     {
-        UCB0TXBUF= *(data+i) ;
-        while (!(IFG2&UCB0TXIFG));
-     }
-    UCB0CTL1 |= UCTXSTP;                       // I2C stop condition after 1st TX
-    IFG2 &= ~UCB0TXIFG;                        // Clear USCI_B0 TX int flag
-}
-
-void i2c_putc(uint8_t addRes,const uint8_t c)
-{
-    while (UCB0CTL1 & UCTXSTP);             // Ensure stop condition got sent
-    UCB0CTL1 |= UCTXSTT;                    // I2C start condition
-
-    while (!(IFG2&UCB0TXIFG));
-    UCB0TXBUF = addRes;
-
-    while (!(IFG2&UCB0TXIFG));
-    UCB0TXBUF = c;
-
-    UCB0CTL1 |= UCTXSTP;                       // I2C stop condition after 1st TX
-    IFG2 &= ~UCB0TXIFG;                        // Clear USCI_B0 TX int flag
-}
-
-int8_t i2c_getc()
-{
-    if(UCSTTIFG)
-        return UCB0RXBUF;
-    else
-        return 0;
-}
 /**
  * \brief Check for ACK/NACK and handle NACK condition if occured
  * \param[in] dev - the I2C slave device

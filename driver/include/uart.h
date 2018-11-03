@@ -3,6 +3,15 @@
  *
  *  Created on: Oct 16, 2018
  *      Author: truongtx
+ *      //                MSP430G2xx3
+//             -----------------
+//         /|\|              XIN|-
+//          | |                 | 32kHz
+//          --|RST          XOUT|-
+//            |                 |
+//            |     P1.2/UCA0TXD|------------>
+//            |                 | 9600 - 8N1
+//            |     P1.1/UCA0RXD|<------------
  */
 
 #ifndef DRIVER_INCLUDE_UART_H_
@@ -28,10 +37,10 @@ typedef struct
 int8_t uart_init(uart_config_t *config);
 
 /*Enable interrupt receive data and transmit data*/
-void uart_enableInt();
+void uart_enableRXInt(void (*cbRxHandler)(void *args));
 
 /*Disable interrupt*/
-void uart_disableInt();
+void uart_disableRXInt();
 
 /**
  * \brief Read a character from UART
@@ -55,7 +64,7 @@ int8_t uart_puts(const int8_t *str);
 /*
  * write a number to UART;
  * */
-int8_t uart_putnum(uint32_t val, uint8_t dec, uint8_t neg);
+void uart_putnum(uint32_t val, uint8_t dec, uint8_t neg);
 
 
 
