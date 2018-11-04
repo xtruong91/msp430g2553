@@ -19,7 +19,7 @@
 
 
 int8_t HC06_init();
-void HC06_send(const int8_t* buffer);
+void HC06_send(int8_t* buffer);
 void HC06_enableRxISR(void (*cbRxHandler)(void* args));
 
 #endif /* HAL_INCLUDE_HC06_H_ */

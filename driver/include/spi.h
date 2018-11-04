@@ -23,46 +23,45 @@
 #include "type.h"
 #include "ring_buffer.h"
 
+typedef enum{
+    MASTER,
+    SLAVE
+}ESpiMode;
+
+typedef enum{
+    ModuleA,
+    ModuleB
+}ESpiType;
+
+typedef enum{
+    RSPI_100KHz,  //SMCLK/10
+    RSPI_500KHz, // SMCLK/2
+    RSPI_1MHz    // SMCLK
+}ESpiBaudRate;
+
 typedef struct {
-    BOOL master; // true: set master, otherwise set slave
-    int8_t mode; // 0: configure SPIA, otherwise configure for SPIB
-    uint16_t baudrate;
-
+    ESpiMode eMode;
+    ESpiType eType;
+    ESpiBaudRate eBaudRate;
 }spi_config;
-// ring-buffer for usca1 module
-rbd_t g_rbd1;
-char g_rbmem1[BUFFER_LENGTH];
 
-//ring buffer for usca2 module;
-rbd_t g_rbd2;
-char g_rbmem2[BUFFER_LENGTH];
+
 /*
 * \brief Initialize the SPI peripheral
 * \param[in] config - the SPI configuration
 * \return 0 on success, -1 otherwise
 */
 
-BOOL spi_init(spi_config* config);
+void spi_init(spi_config* config);
 
 /*Enable interrupt receive data and transmit data*/
-void spi_enableInt();
+void spi_enableRxISR(void (*cbRxHandler)(void *args));
+void spi_disableRxISR();
 
-/*Disable interrupt*/
-void spi_disableInt();
+int8_t spi_getc(void);
+int8_t spi_gets(int8_t *buffer, uint8_t length);
 
-int8_t spi_getchar(void);
-
-/**
- * \brief Write a character to UART
- * \param[in] c - the character to write
- * \return 0 on sucess, -1 otherwise
- */
-BOOL spi_putchar(int8_t c);
-
-/**
- * \brief Write a string to UART
- * \return 0 on sucesss, -1 otherwise
- */
-BOOL spi_puts(const int8_t *str);
+void spi_putc(const int8_t data);
+int8_t spi_puts(const int8_t *buffer, uint8_t length);
 
 #endif /* DRIVER_SPI_H_ */

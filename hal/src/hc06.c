@@ -11,10 +11,9 @@
 
 int8_t HC06_init(){
     uart_config_t config = {9600};
-    uart_init(&config);
-
+    return uart_init(&config);
 }
-void HC06_send(const int8_t* buffer){
+void HC06_send(int8_t* buffer){
     if(buffer == '\0')
         return;
     uart_puts(buffer);

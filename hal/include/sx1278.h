@@ -6,29 +6,43 @@
  *      transmit and receive data via LoRa
  *
  *       *      Module Lora SX1278  MSP430G2553
+ *      f = 433MHz (420-150MHz)
+ *      R = 10Km (3000m -no obstacle)
+ *      support FSK  FSK, GFSK, MSK, GMSK, LoRaTM
+ *      Votage = 3.3V (1.8V - 3.7V)
+ *      P = 20dBm - 10mW
+ *      P = 127dB
+ *      CRC 256 byte
+ *      R = 1200- 115200 bps.
+ *      T =  -40- 85.
+ *
+ *      Map MSP430 and SX1278
         VCC     3.3VDC
         GND     GND
-        M1  Any GPIO set to P2.0 / GND
-
+        M1  Any GPIO set to P2.1 & P2.2
         RXD Pin 1.1
         TXD Pin 1.2
 
-        M0  Any GPIO set to 2.1 / GND
+
  */
 
 #ifndef HAL_INCLUDE_SX1278_H_
 #define HAL_INCLUDE_SX1278_H_
 
-typedef enum {
-    Normal,
-    Wake_up,
-    Power_saving,
-    Sleep
-}EMode;
+#include "type.h"
 
-void sx1278_init(EMode mode);
-void sx1278_send(const int8_t* data, uint8_t length);
-void sx1278_receive(int8_t* data, uint8_t length);
+typedef enum {
+    Normal,         //Serial open and wireless open, transparent transmission
+    Wake_up,        // Serial open and wireless open
+    Power_saving,   //   Serial close and wireless wake-up mode
+    Sleep           //Sleep, and can receive parameter setting command
+}ELoraMode;
+
+void sx1278_init();
+void sx1278_setMode(ELoraMode mode);
+void sx1278_enableRxISR(void (*cbRxHandler)(void *args));
+void sx1278_disableRxISR();
+void sx1278_send(const int8_t *data, uint8_t length);
 
 
 
