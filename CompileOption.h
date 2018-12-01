@@ -14,20 +14,20 @@
 // Select a board for building
 #define BOARD_VERSION_LoRaMASTER    1
 #define BOARD_VERSION_LoRaSLAVE    2
-#define BOARD_VERSION_MASTER1   3
+#define BOARD_VERSION_WifiSLAVE   3
 #define BOARD_VERSION_MASTER2   4
 #define BOARD_VERSION_SERVO     5
 #define BOARD_VERSION_LORA     6 // used for test LoRa network
 
 // ----------------------------------- Board selection --------------------------------------------//
-#define BOARD_VERSION           BOARD_VERSION_LoRaMASTER
+#define BOARD_VERSION           BOARD_VERSION_WifiSLAVE
 
 #if (BOARD_VERSION == BOARD_VERSION_LoRaMASTER)
     #define MASTER_VERSION      1
 #elif (BOARD_VERSION == BOARD_VERSION_LoRaSLAVE)
     #define SLAVE2_VERSION      1
-#elif(BOARD_VERSION == BOARD_VERSION_MASTER1)
-    #define MASTER1_VERSION      1
+#elif(BOARD_VERSION == BOARD_VERSION_WifiSLAVE)
+    #define BOARD_VERSION_WifiSLAVE_VERSION      1
 #elif (BOARD_VERSION == BOARD_VERSION_MASTER2)
     #define MASTER2_VERSION     1
 #elif (BOARD_VERSION == BOARD_VERSION_LORA)
