@@ -14,17 +14,20 @@
 #include "type.h"
 #include "ConfigChip.h"
 
-#if(BOARD_VERSION == BOARD_VERSION_SLAVE1)
+#if(BOARD_VERSION == BOARD_VERSION_LoRaMASTER)
     //CPU clock rate
     #define FCY 1000000L
     //UART port
-    #define UART_EN
-    #define UART_BAUDRATE   115200
+    #undef DEBUG_EN
+    #define UART_BAUDRATE   9600
     // SPI protocol for transfer with master/slave
-    #undef SPI1_EN
+    #undef  SPI1_EN
     #define SPI2_EN
     //I2C protocol used for transfer data with slave;
     #undef I2C_EN
+    #define SX1278_EN
+    #undef ADC
+
 #elif (BOARD_VERSION == BOARD_VERSION_SLAVE2)
         //CPU clock rate
     #define FCY 1000000L

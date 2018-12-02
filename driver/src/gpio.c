@@ -20,18 +20,19 @@ void pint_init(CallBack cbfunction)
     _BIS_SR(GIE);                 // Enter LPM4 w/interrupt
 }
 
-void pin_mode(uint8_t pin, uint8_t mode)
-{
-    if(pin > 7)
-    {
+/*
+ * Pin: mapping pin 1.0 ~ 1.7
+ * Mode: output or input
+ * */
+void pin_mode(uint8_t pin, uint8_t mode){
+    if(pin > 7){
         mode ? (P2DIR |= 1 << (pin - 8)) : (P2DIR &= ~(1 << (pin - 8)));
-    }else
-    {
+    }else{
         mode ? (P1DIR |= 1 << pin) : (P1DIR &=~(1 << pin));
     }
 }
-void digital_write(uint8_t pin, uint8_t value)
-{
+
+void digital_write(uint8_t pin, uint8_t value){
     if(pin > 7){
         value ? (P2OUT |= 1 << (pin - 8)) : (P2OUT &= ~(1 << (pin-8)));
     }else{
@@ -41,8 +42,7 @@ void digital_write(uint8_t pin, uint8_t value)
 
 // Port 1 interrupt service routine
 #pragma vector=PORT1_VECTOR
-__interrupt void Port_1(void)
-{
+__interrupt void Port_1(void){
 
   if(_callback != '\0')
       _callback(0);

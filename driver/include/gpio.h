@@ -14,6 +14,24 @@
 #define HIGH        1
 #define LOW         0
 
+#define P1_0        0
+#define P1_1        1
+#define P1_2        2
+#define P1_3        3
+#define P1_4        4
+#define P1_5        5
+#define P1_6        6
+#define P1_7        7
+#define P2_0        8
+#define P2_1        9
+#define P2_2        10
+#define P2_3        11
+#define P2_4        12
+#define P2_5        13
+
+
+
+
 extern void pin_init(CallBack cbFunction);
 /*
  * Pin 1.0 - pin 0, 1.1 - pin 1, ... pin 2.0 - pin 8, pin 2.1 - pin 9, pin 2.2 - pin 10

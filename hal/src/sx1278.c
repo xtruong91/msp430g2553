@@ -11,35 +11,34 @@
 
 void sx1278_init(){
 
-    pin_mode(9, OUTPUT);
-    pin_mode(10, OUTPUT);
+    pin_mode(P2_0, OUTPUT);
+    pin_mode(P2_1, OUTPUT);
     uart_config_t config = {9600};
     uart_init(&config);
     // default set normal mode;
-    digital_write(9, LOW);
-    digital_write(10, LOW);
+    sx1278_setMode(Normal);
 }
 
 void sx1278_setMode(ELoraMode mode){
     switch(mode){
         case Normal:{
-            digital_write(9, LOW);
-            digital_write(10, LOW);
+            digital_write(P2_0, LOW);
+            digital_write(P2_1, LOW);
             break;
         }
         case Wake_up:{
-            digital_write(9, LOW);
-            digital_write(10, HIGH);
+            digital_write(P2_0, LOW);
+            digital_write(P2_1, HIGH);
             break;
         }
         case Power_saving:{
-            digital_write(9, HIGH);
-            digital_write(10, LOW);
+            digital_write(P2_0, HIGH);
+            digital_write(P2_1, LOW);
             break;
         }
         case Sleep:{
-            digital_write(9, HIGH);
-            digital_write(10, HIGH);
+            digital_write(P2_0, HIGH);
+            digital_write(P2_1, HIGH);
             break;
         }
         default:{
