@@ -30,6 +30,10 @@
 #define HAL_INCLUDE_SX1278_H_
 
 #include "type.h"
+#include "gpio.h"
+
+#define M0  P2_2
+#define M1  P2_3
 
 typedef enum {
     Normal,         //Serial open and wireless open, transparent transmission

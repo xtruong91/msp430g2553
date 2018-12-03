@@ -7,12 +7,11 @@
 #include "sx1278.h"
 #include "uart.h"
 #include "isr.h"
-#include "gpio.h"
 
 void sx1278_init(){
 
-    pin_mode(P2_0, OUTPUT);
-    pin_mode(P2_1, OUTPUT);
+    pin_mode(M0, OUTPUT);
+    pin_mode(M1, OUTPUT);
     uart_config_t config = {9600};
     uart_init(&config);
     // default set normal mode;
@@ -22,23 +21,23 @@ void sx1278_init(){
 void sx1278_setMode(ELoraMode mode){
     switch(mode){
         case Normal:{
-            digital_write(P2_0, LOW);
-            digital_write(P2_1, LOW);
+            digital_write(M0, LOW);
+            digital_write(M1, LOW);
             break;
         }
         case Wake_up:{
-            digital_write(P2_0, LOW);
-            digital_write(P2_1, HIGH);
+            digital_write(M0, LOW);
+            digital_write(M1, HIGH);
             break;
         }
         case Power_saving:{
-            digital_write(P2_0, HIGH);
-            digital_write(P2_1, LOW);
+            digital_write(M0, HIGH);
+            digital_write(M1, LOW);
             break;
         }
         case Sleep:{
-            digital_write(P2_0, HIGH);
-            digital_write(P2_1, HIGH);
+            digital_write(M0, HIGH);
+            digital_write(M1, HIGH);
             break;
         }
         default:{

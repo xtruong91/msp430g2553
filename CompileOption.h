@@ -25,7 +25,7 @@
 #if (BOARD_VERSION == BOARD_VERSION_LoRaMASTER)
     #define MASTER_VERSION      1
 #elif (BOARD_VERSION == BOARD_VERSION_LoRaSLAVE)
-    #define SLAVE2_VERSION      1
+    #define SLAVE_VERSION      1
 #elif(BOARD_VERSION == BOARD_VERSION_WifiSLAVE)
     #define BOARD_VERSION_WifiSLAVE_VERSION      1
 #elif (BOARD_VERSION == BOARD_VERSION_MASTER2)
@@ -42,6 +42,7 @@
 #define TRANSISC_LIVE_MONITOR_EN                    0   // Enable live monitoring function
 // ----------------------------------- Debug module ----------------------------------------------- //
 #define     DEBUG_EN                                1   // Enable Debug library
+#define     UART_BAUDRATE                           9600
 #define     PERFORMANCE_COUNTER_EN                  0   // Enable performance counter
 #define     DEBUG_SAMPLE_DATA_EN                    0   // Enable sampling data for testing purpose
 

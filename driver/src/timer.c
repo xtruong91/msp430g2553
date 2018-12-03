@@ -167,43 +167,43 @@ int timer_capture(struct time *time)
     return err;
 }
 
-__attribute__((interrupt(TIMER1_A0_VECTOR))) void timer1_isr(void)
-{
-    size_t i;
+//__attribute__((interrupt(TIMER1_A0_VECTOR))) void timer1_isr(void)
+//{
+//    size_t i;
+//
+//    /* Clear the interrupt flag */
+//    TA1CCTL0 &= ~CCIFG;
+//
+//    /* Increment the timer tick */
+//    _timer_tick++;
+//
+//    for (i = 0; i < MAX_TIMERS; i++) {
+//        /* If the timer is enabled and expired, invoke the callback */
+//        if ((_timer[i].callback != NULL) && (_timer[i].expiry == _timer_tick)) {
+//            _timer[i].callback(_timer[i].arg);
+//
+//            if (_timer[i].periodic > 0) {
+//                /* Timer is periodic, calculate next expiration */
+//                _timer[i].expiry += _timer[i].periodic;
+//            } else {
+//                /* If timer is not periodic, clear the callback to disable */
+//                _timer[i].callback = NULL;
+//            }
+//        }
+//    }
+//}
 
-    /* Clear the interrupt flag */
-    TA1CCTL0 &= ~CCIFG;
-
-    /* Increment the timer tick */
-    _timer_tick++;
-
-    for (i = 0; i < MAX_TIMERS; i++) {
-        /* If the timer is enabled and expired, invoke the callback */
-        if ((_timer[i].callback != NULL) && (_timer[i].expiry == _timer_tick)) {
-            _timer[i].callback(_timer[i].arg);
-
-            if (_timer[i].periodic > 0) {
-                /* Timer is periodic, calculate next expiration */
-                _timer[i].expiry += _timer[i].periodic;
-            } else {
-                /* If timer is not periodic, clear the callback to disable */
-                _timer[i].callback = NULL;
-            }
-        }
-    }
-}
-
-__attribute__((interrupt(TIMER1_A1_VECTOR))) void timer1_taiv_isr(void)
-{
-    /* Check for TACCR1 interrupt */
-    if (TA1IV & TA1IV_TACCR1) {
-        /* Save timer values */
-        _capture_tick = _timer_tick;
-        _capture_ta1ccr1 = TA1CCR1;
-
-        /* Set capture flag */
-        _capture_flag = 1;
-    }
-}
+//__attribute__((interrupt(TIMER1_A1_VECTOR))) void timer1_taiv_isr(void)
+//{
+//    /* Check for TACCR1 interrupt */
+//    if (TA1IV & TA1IV_TACCR1) {
+//        /* Save timer values */
+//        _capture_tick = _timer_tick;
+//        _capture_ta1ccr1 = TA1CCR1;
+//
+//        /* Set capture flag */
+//        _capture_flag = 1;
+//    }
+//}
 
 

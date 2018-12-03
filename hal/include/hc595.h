@@ -12,8 +12,10 @@
 #include "spi.h"
 
 
-
-void HC595_init();
+/*
+ * ssPin: STRB pin used for latch pin in HC595;
+ * */
+void HC595_init(uint8_t ssPin);
 // Send number through down LED7Seg
 void HC595_sendNumber(const uint16_t number);
 
