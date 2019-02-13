@@ -4,7 +4,13 @@
  *  Created on: Oct 17, 2018
  *      Author: truongtx
  *
- *      use Timer send message each one second;
+ * Hardware component:
+ * 1. MSP430G2553 launch pad board.
+ * 2. Bluetooth slave module -> receive command from android device
+ * 3. HC595 IC -> display distance parameter on LED
+ * 4. HC-SR04 sensor -> measure distance to obstacle
+ * 5. SX1278 module -> transceiver data with the control board.
+ *
  */
 
 #include "ConfigChip.h"
@@ -16,7 +22,7 @@
 #include "hcsr04.h"
 #include "hc06.h"
 
-#if (BOARD_VERSION == BOARD_VERSION_LoRaSLAVE)
+#if (BOARD_VERSION == BOARD_VERSION_REMOTECAR)
 
 void blinkLed(void);
 
@@ -25,42 +31,40 @@ static void cbRxISR(void *args){
 }
 
 
-
+unsigned int distance;
 int main(){
+    // setup clock for MCU
     CLKInit(CLK_1MHZ);
-
     pin_mode(P1_0, OUTPUT); // led for debug;
+
 #if (DEBUG_EN > 0)
     UARTStdioConfig(UART_BAUDRATE);;
-    UARTprintf("d value: %d \n ", -12344);
-    UARTprintf("s String: %s \n", "test unit");
+    UARTprintf("Configure UART module with baudrate = %d \n",UART_BAUDRATE);
 #endif
 
 #if (SX1278_EN > 0)
     sx1278_init();
     sx1278_enableRxISR(cbRxISR);
-    blinkLed();
+    UARTprintf("Initialized LoRa module! \n");
 #endif
 
 #if (HCSR04_EN > 0)
     HCSR04_init(0);
-    blinkLed();
-    //UARTprintf("Initialized HCSR04 module \n");
+    UARTprintf("Initialized Sonar sensor! \n");
 #endif
 
 #if (HC595_EN > 0)
     HC595_init(P2_5);
-    blinkLed();
-    HC595_sendNumber(30);
+    HC595_sendNumber(0);
+    UARTprintf("Initialized LED7SEG module! \n");
 #endif
 
 #if (HC06_EN > 0)
-
+    HC06_init();
+    UARTprintf("Initialized Bluetooth module \n");
 #endif
 
-    unsigned int distance;
     while(1){
-
         distance = getDistance();
         UARTprintf("Distance: %d \n", distance);
         HC595_sendNumber(distance);

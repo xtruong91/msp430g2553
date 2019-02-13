@@ -14,7 +14,7 @@
 #include "type.h"
 #include "CompileOption.h"
 
-#if(BOARD_VERSION == BOARD_VERSION_LoRaMASTER)
+#if(BOARD_VERSION == BOARD_VERSION_REMOTECAR)
     //CPU clock rate
     #define FCY 1000000L
     //UART port
@@ -27,6 +27,9 @@
     #define I2C_EN      0
     #define SX1278_EN   1
     #define ADC_EN      0
+    #define HCSR04_EN   1
+    #define HC595_EN    1
+    #define HC06_EN     1
 
 #elif (BOARD_VERSION == BOARD_VERSION_LoRaSLAVE)
         //CPU clock rate

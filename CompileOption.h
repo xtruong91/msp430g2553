@@ -4,7 +4,7 @@
  *  Created on: Sep 19, 2018
  *      Author: truongtx
  *
- *      build application depend product type
+ *      build option for  the difference board
  *
  */
 
@@ -12,20 +12,20 @@
 #define COMPILEOPTION_H_
 
 // Select a board for building
-#define BOARD_VERSION_LoRaMASTER    1
-#define BOARD_VERSION_LoRaSLAVE     2
+#define BOARD_VERSION_REMOTECAR    1
+#define BOARD_VERSION_CONTROLBOARD     2
 #define BOARD_VERSION_WifiSLAVE     3
 #define BOARD_VERSION_MASTER2       4
 #define BOARD_VERSION_SERVO         5
 #define BOARD_VERSION_LORA          6 // used for test LoRa network
 
 // ----------------------------------- Board selection --------------------------------------------//
-#define BOARD_VERSION           BOARD_VERSION_LoRaMASTER
+#define BOARD_VERSION           BOARD_VERSION_REMOTECAR
 
-#if (BOARD_VERSION == BOARD_VERSION_LoRaMASTER)
-    #define MASTER_VERSION      1
-#elif (BOARD_VERSION == BOARD_VERSION_LoRaSLAVE)
-    #define SLAVE_VERSION      1
+#if (BOARD_VERSION == BOARD_VERSION_REMOTECAR)
+    #define REMOTECAR_VERSION      1
+#elif (BOARD_VERSION == BOARD_VERSION_CONTROLBOARD)
+    #define CONTROLBOARD_VERSION      1
 #elif(BOARD_VERSION == BOARD_VERSION_WifiSLAVE)
     #define BOARD_VERSION_WifiSLAVE_VERSION      1
 #elif (BOARD_VERSION == BOARD_VERSION_MASTER2)
