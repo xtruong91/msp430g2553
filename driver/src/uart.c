@@ -87,22 +87,57 @@ int8_t uart_init(uart_config_t *config)
     return status;
 }
 
-static isr_config isrConfig;
+
+void uart_getc(char *ch)
+{
+    while (!(IFG2 & UCA0RXIFG));
+    *ch = UCA0RXBUF;
+    IFG2 &= ~UCA0RXIFG;
+}
+void uart_getchars(char *str, unsigned int length)
+{
+    unsigned int index;
+    char temp;
+
+    index = 0;
+    temp = 0;
+
+    while (1)
+    {
+        uart_getc(&temp);
+        uart_getc(temp);
+
+        if (temp == '\r')
+        {
+            uart_putchar('\n');
+            break;
+        }
+
+        if (index < length)
+        {
+            str[index] = temp;
+            index++;
+        }
+    }
+
+    str[index] = '\0';
+}
+
 void uart_enableRXInt(void (*cbRxHandler)(void *args))
 {
     IE2 |= UCA0RXIE;
     __bis_SR_register(GIE);
 
-    isrConfig.module = RX_UART;
-    isrConfig.cbFunction = cbRxHandler;
-    subscribe(&isrConfig);
+//    isrConfig.module = RX_UART;
+//    isrConfig.cbFunction = cbRxHandler;
+//    subscribe(&isrConfig);
 }
 
 /*Disable interrupt*/
 void uart_disableRXInt()
 {
     IE2 &= ~UCA0RXIE;
-    unsubscribe(&isrConfig);
+    //unsubscribe(&isrConfig);
 }
 /**
  * \brief Read a character from UART

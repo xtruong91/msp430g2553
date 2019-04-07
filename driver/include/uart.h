@@ -48,6 +48,9 @@ void uart_disableRXInt();
  */
 int8_t uart_getchar(void);
 
+extern void uart_getc(char *ch);
+extern void uart_getchars(char *str, unsigned int length);
+
 /**
  * \brief Write a character to UART
  * \param[in] c - the character to write
