@@ -10,7 +10,7 @@
 #include <msp430.h>
 
 
-void CLKInit(eCLK clk)
+void clk_init(eCLK clk)
 {
     watchdog_disable();
     switch(clk)

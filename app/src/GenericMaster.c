@@ -21,7 +21,7 @@ void readDateTime();
 void blinkLed();
 
 int main(){
-    CLKInit(CLK_1MHZ);
+    clk_init(CLK_1MHZ);
     pin_mode(LED, OUTPUT);
 
 #if (DEBUG_EN > 0)

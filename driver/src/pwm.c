@@ -13,7 +13,7 @@ BOOL pwm_init()
     P1SEL |= BIT2; //Select pin 1.2 as our PWM output.
     TA0CCTL1 = OUTMOD_7;
     TA0CTL = TASSEL_2 + MC_1; //TASSEL_2 selects SMCLK as the clock source, and MC_1 tells it to count up to the value in TA0CCR0.
-    return 1;
+    return TRUE;
 }
 /*
  * set period timer;

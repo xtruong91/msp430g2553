@@ -9,18 +9,19 @@
 #include "uart.h"
 #include "flash.h"
 #include "helper.h"
+#include "type.h"
 
-char *menuStr = "------------MSP430 BOOT MENU------------\r\n"
+int8_t *menuStr = "------------MSP430 BOOT MENU------------\r\n"
         " (D):Download Program From Serial\r\n"
         " (E):Erase Flash\r\n"
         " (R):Reboot\r\n";
 
-char *commandStr = "command:";
-char *commandErrorStr = "command error!\r\n";
+int8_t *commandStr = "command:";
+int8_t *commandErrorStr = "command error!\r\n";
 
 typedef int (*ApplicationMainFunc)();
 
-const ApplicationMainFunc * const appMainFunc = (const ApplicationMainFunc * const ) 0xCA1E;
+const ApplicationMainFunc * const appMainFunc = (ApplicationMainFunc*) 0xCA1E;
 
 unsigned int __attribute__((section(".mode_flag"))) isBootMode;
 
@@ -167,7 +168,7 @@ static void eraseApplication(void)
 
     for (ptr = APP_SEGMENT_START; ptr <= APP_SEGMENT_END; ptr += 0x200)
     {
-        flash_EraseSingleSegments(ptr);
+        flash_eraseSegment((SegmentAddr)ptr);
         uart_putchar('.');
     }
 
@@ -183,7 +184,6 @@ static void downloadProgram(void)
     char length;
     char temp;
 
-    unsigned char *ptr;
     uart_putchar('n');
 
     while (1)
@@ -228,11 +228,7 @@ static void downloadProgram(void)
                  */
                 if (format.type == 0)
                 {
-                    for (index = 0; index < format.length; index++)
-                    {
-                        ptr = ((unsigned char *) (format.address)) + index;
-                        flash_WriteByte(ptr, format.data[index]);
-                    }
+                    flash_writeBlock((SegmentAddr)format.address,(char*)format.data, format.length);
                 }
 
                 uart_putchar('n');

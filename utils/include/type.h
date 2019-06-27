@@ -304,7 +304,6 @@ typedef enum _bool {
 */
 
 #define OK              TRUE
-#define FAIL            FALSE
 
 #ifndef NULL
 #define NULL            0
@@ -314,18 +313,7 @@ typedef enum _bool {
 
 #define NULLIDX         0xFF            //An unitialized index value
 
-#define BIT0            0x01            //Mask to represent bit 0 (the LSb)
-#define BIT1            0x02            //Mask to represent bit 1
-#define BIT2            0x04            //Mask to represent bit 2
-#define BIT3            0x08            //Mask to represent bit 3
-#define BIT4            0x10            //Mask to represent bit 4
-#define BIT5            0x20            //Mask to represent bit 5
-#define BIT6            0x40            //Mask to represent bit 6
-#define BIT7            0x80            //Mask to represent bit 7 (the MSb of a uint8)
 
-
-#define BIT8            0x0100          //Mask to represent bit 8 (the LSb of the most-significant byte in an uint8)
-#define BIT9            0x0200          //Mask to represent bit 9
 #define BIT10           0x0400          //Mask to represent bit 10
 #define BIT11           0x0800          //Mask to represent bit 11
 #define BIT12           0x1000          //Mask to represent bit 12

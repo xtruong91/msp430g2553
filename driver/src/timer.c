@@ -57,7 +57,7 @@ BOOL timer_init(void)
      */
     TA1CCTL1 = CM_3 | CCIS_2 | SCS | CAP | CCIE;
 
-    return 0;
+    return TRUE;
 }
 
 /**
@@ -100,7 +100,7 @@ BOOL timer_create(uint16_t timeout_ms, int periodic, void (*callback)(void *), v
         handle = i;
     }
 
-    return handle;
+    return handle >= 0 ? TRUE : FALSE;
 }
 
 /**
@@ -123,7 +123,7 @@ BOOL timer_delete(int handle)
         status = 0;
     }
 
-    return status;
+    return status == 0 ? TRUE : FALSE;
 }
 
 /**

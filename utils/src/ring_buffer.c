@@ -58,7 +58,7 @@ BOOL ring_buffer_init(rbd_t *rbd, rb_attr_t *attr)
         }
     }
 
-    return err;
+    return err == 0 ? TRUE : FALSE;
 }
 
 /**
@@ -79,7 +79,7 @@ BOOL ring_buffer_put(rbd_t rbd, const void *data)
         err = -1;
     }
 
-    return err;
+    return err == 0 ? TRUE : FALSE;
 }
 
 /**
@@ -99,7 +99,7 @@ BOOL ring_buffer_get(rbd_t rbd, void *data)
         err = -1;
     }
 
-    return err;
+    return err == 0 ? TRUE : FALSE;
 }
 
 static int16_t _ring_buffer_full(struct ring_buffer *rb)

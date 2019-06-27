@@ -8,40 +8,84 @@
 #include "flash.h"
 #include "msp430g2553.h"
 
-void FLASH_Initialize(void)
+void flash_init(void)
 {
+    /*
+     * FWKEY: Flash key for write
+     * FSSEL_2: Select source clock
+     * */
     FCTL2 = FWKEY + FSSEL_2 + FN3;
 }
 
 /* Segment size is 512B */
-void FLASH_Init(unsigned char * addr)
+void flash_eraseSegment(SegmentAddr segment)
 {
-    unsigned char *ptr;
+    char *ptr;
+    ptr = (char*)segment; // Initialize flash pointer
+    FCTL1 = FWKEY + ERASE; // set Erase bit
+    FCTL3 = FWKEY;  // Clear Lock bit
 
-    ptr = addr;
-    FCTL1 = FWKEY + ERASE;
-    FCTL3 = FWKEY;
+    *ptr = 0xFF; // Dummy write to erase Flash segment
 
-    *ptr = 0xFF;
     while (FCTL3 & BUSY);
 
     FCTL1 = FWKEY;
     FCTL3 = FWKEY + LOCK;
 }
 
-void FLASH_WriteByte(unsigned char * addr, unsigned char data)
+void flash_eraseAll(void)
 {
-    unsigned char *ptr;
+    char* baseOffSetMain =(char*)(Segment_Main);
 
-    ptr = addr;
-    FCTL1 = FWKEY + WRT;
-    FCTL3 = FWKEY;
+    // delete all;
+    int i;
+    for(i = 0; i < 64; i++)
+    {
+        baseOffSetMain = (char*)(Segment_Main + i);
+        *baseOffSetMain = 0xFF;
+    }
 
-    *ptr = data;
-    while (FCTL3 & BUSY);
-
-    FCTL1 = FWKEY;
-    FCTL3 = FWKEY + LOCK;
 }
+
+int flash_writeBlock(SegmentAddr segment, const char* data, unsigned int length)
+{
+    if(data == NULL || length == 0)
+    {
+        return -1;
+    }
+
+    unsigned char *ptr = (unsigned char*)segment; // Flash pointer
+
+    FCTL1 = FWKEY + WRT; // Set WRT bit for write operation
+    FCTL3 = FWKEY; //Clear Lock bit
+
+    while (FCTL3 & BUSY);
+    int i;
+    for(i = 0; i < length; i++)
+    {
+        *ptr = data[i];
+    }
+
+
+    FCTL1 = FWKEY; // Clear WRT bit
+    FCTL3 = FWKEY + LOCK; // Set LOCK bit
+    return i;
+}
+
+int flash_readBlock(SegmentAddr segment, char* data, unsigned int length)
+{
+    if(data == NULL || length == 0)
+        return -1;
+    char *Flash_ptr = (char*)segment;              // Segment C pointer
+
+    int i;
+    for(i = 0; i < length; i++)
+    {
+        data[i] = *Flash_ptr;// copy value segment C to variable
+        Flash_ptr += i; // Jump to desired address
+    }
+    return i;
+}
+
 
 

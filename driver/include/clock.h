@@ -27,7 +27,11 @@ typedef enum {
     CLK_16MHZ
 }eCLK;
 
-void CLKInit(eCLK clk);
+/*
+ * Initialize kind of source clock
+ * @param: clk source clock
+ * */
+void clk_init(eCLK clk);
 
 void delay_ms (int t);
 void delay_us (int t);

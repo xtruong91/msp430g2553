@@ -185,7 +185,7 @@ BOOL i2c_transfer(const int8_t dev, struct i2c_data *data)
         UCB0CTL1 |= UCTXSTP;
     }
 
-    return err;
+    return TRUE;
 }
 
 

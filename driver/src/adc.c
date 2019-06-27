@@ -9,7 +9,19 @@
 
 void adc_init(EADCChannel pin)
 {
-    ADC10CTL0 = ADC10SHT_2 + ADC10ON + ADC10IE; // ADC10ON, interrupt enabled
+    /*
+     * Vr+ = Vref+
+     * ADC10SHT_2: ADC sample and hold time = 16 ADC clocks
+     * Turn on ADC
+     * Enable ADC10 interrupt
+     * Turn on reference generator
+     *
+     * Select Input channel depend on input parameter
+     * ADC10DF = 0: The 10 bit conversion result are right justified.
+     * ADC10 Clock divider: 1
+     * ADC10 Clock source select: SMCLK
+     * */
+    ADC10CTL0 = ADC10SHT_2 + ADC10ON + ADC10IE + REFON; // ADC10ON, interrupt enabled
     if(pin > 15)
     {
         ADC10CTL1 = INCH_0;                       // input A1

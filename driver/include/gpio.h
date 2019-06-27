@@ -1,5 +1,5 @@
 /*
- * button.h
+ * gpio.h
  *
  *  Created on: Sep 19, 2018
  *      Author: truongtx
@@ -31,13 +31,17 @@
 
 
 
-
-extern void pin_init(CallBack cbFunction);
+/*
+ * Configure for input/output
+ * */
+extern void pin_init();
 /*
  * Pin 1.0 - pin 0, 1.1 - pin 1, ... pin 2.0 - pin 8, pin 2.1 - pin 9, pin 2.2 - pin 10
  * */
 extern void pin_mode(uint8_t pin, uint8_t mode);
 extern void digital_write(uint8_t pin, uint8_t value);
+
+extern void attachInterrupt(CallBack IRCallback);
 
 
 #endif /* DRIVER_GPIO_H_ */

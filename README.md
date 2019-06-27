@@ -1,18 +1,20 @@
-#develop MSP430G2553
+# Develop MSP430G2553 KIT
 
-1. Setting up the toolchain
+## Prerequesite
 
-Download and install CCS Toolchain at [here](http://processors.wiki.ti.com/index.php/Download_CCS)
+#### Setting up the environent
 
-2. Project Structure  
+- Download and install [Code Composer Studio Toolchain](http://processors.wiki.ti.com/index.php/Download_CCS)
 
-app - the application layer - contain  the specific user application
-bootloader - is small code to inject binary down the microcontroller
-driver - contain full peripheral of MSP430: SRAM, Flash, GPIO, TIMER, Watchdog, UART, I2C, SPI 
-hal - Hardware Abstract layer provide interface to adaper the other module with MSP430
-utils - some useful functions such as crc, ring buffer.
+- Pull project on [the repository](https://github.com/Truongtx91/msp430)
 
-3. Build
+- Import project into workspace: File->Import->Code Composer Studio
 
-Import project into CSS toolchain
-Click Run to build it.
+## Project Structure  
+
+1. App - which define  interface for user application
+2. Bootloader - which is small boot program use to trigger and flash binary data into the microcontroller
+3. Driver - has role enable peripheral module of MSP430 such as SRAM, Flash, GPIO, 
+	TIMER, Watchdog, PWM, UART, I2C, SPI.
+4. HAL(Hardware Abstract Layer) - provide interface to connect between the other module and MSP430
+5. Utils - some useful general functions such as CRC, Ring Buffer.
