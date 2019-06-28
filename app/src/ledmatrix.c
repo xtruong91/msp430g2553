@@ -15,21 +15,21 @@
 #include "hc595.h"
 #include "hcsr04.h"
 #include "hc06.h"
+#include "lebmatrix.h"
 
-#if (BOARD_VERSION == BOARD_VERSION_LoRaSLAVE)
+int distance = 0;
 
-void blinkLed(void);
-
-static void cbRxISR(void *args){
-    blinkLed();
+void cbRxISR(void *args)
+{
+    LedMatrix_blinkLed();
 }
 
-
-
-int main(){
-    CLKInit(CLK_1MHZ);
-
+int
+LedMatrix_init()
+{
+    clk_init(CLK_1MHZ);
     pin_mode(P1_0, OUTPUT); // led for debug;
+
 #if (DEBUG_EN > 0)
     UARTStdioConfig(UART_BAUDRATE);;
     UARTprintf("d value: %d \n ", -12344);
@@ -39,7 +39,7 @@ int main(){
 #if (SX1278_EN > 0)
     sx1278_init();
     sx1278_enableRxISR(cbRxISR);
-    blinkLed();
+    LedMatrix_blinkLed();
 #endif
 
 #if (HCSR04_EN > 0)
@@ -53,30 +53,29 @@ int main(){
     blinkLed();
     HC595_sendNumber(30);
 #endif
-
-#if (HC06_EN > 0)
-
-#endif
-
-    unsigned int distance;
-    while(1){
-
-        distance = getDistance();
-        UARTprintf("Distance: %d \n", distance);
-        HC595_sendNumber(distance);
-        sx1278_send((int8_t*)&distance, sizeof(distance));
-        HC06_send((int8_t*)&distance);
-        blinkLed();
-        delay_ms(1000);
-    }
+    return 0;
 }
 
-void blinkLed(){
+int
+LedMatrix_run()
+{
+    distance = getDistance();
+    //UARTprintf("Distance: %d \n", distance);
+    HC595_sendNumber(distance);
+    sx1278_send((int8_t*)&distance, sizeof(distance));
+    HC06_send((int8_t*)&distance);
+    LedMatrix_blinkLed();
+    delay_ms(1000);
+    return 0;
+}
+
+void
+LedMatrix_blinkLed(void)
+{
     digital_write(P1_0, HIGH);
     delay_ms(1000);
     digital_write(P1_0, LOW);
     delay_ms(1000);
 }
 
-#endif
 

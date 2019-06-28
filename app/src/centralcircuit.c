@@ -1,34 +1,29 @@
 /*
- * GenericMaster.c
+ * CentralCircuit.c
  *
  *  Created on: Oct 17, 2018
  *      Author: truongtx
  */
-#include "ConfigChip.h"
-#include "clock.h"
-#include "bq32000.h"
-#include "hc06.h"
-#include "hc595.h"
-#include "sx1278.h"
-#include "debug.h"
-#include "gpio.h"
 
-#define LED P1_0
+#include "centralcircuit.h"
 
-#if (BOARD_VERSION == BOARD_VERSION_LoRaMASTER)
 void isr_uartrx(void *args);
 void readDateTime();
 void blinkLed();
 
-int main(){
+int
+CentralCircuit_init()
+{
+    // setup clock_system
     clk_init(CLK_1MHZ);
+    // set pin functionality
     pin_mode(LED, OUTPUT);
-
 #if (DEBUG_EN > 0)
-    UARTStdioConfig(UART_BAUDRATE);;
-//    UARTprintf("d value: %d \n ", -12344);
-//    UARTprintf("s String: %s \n", "test unit");
+    // enable debug module
+    UARTStdioConfig(UART_BAUDRATE);
     UARTprintf("Initialized Debug module \n");
+    UARTprintf("d value: %d \n ", -12344);
+    UARTprintf("s String: %s \n", "test unit");
 #endif
 
 #if (SX1278_EN > 0)
@@ -57,17 +52,27 @@ int main(){
     BQ32000_init();
     uart_puts("Initialized BQ3200! \n ");
 #endif
-    int8_t index;
-    while(1){
-        for(index = 0; index < 10; index++){
-            sx1278_send(&index, 1);
-            UARTprintf("Tx:%d \n", index);
-            blinkLed();
-        }
-    }
+
+    return 0;
 }
 
-void readDateTime(){
+int
+CentralCircuit_run()
+{
+    int8_t index;
+    for(index = 0; index < 10; index++)
+    {
+        sx1278_send(&index, 1);
+        UARTprintf("Tx:%d \n", index);
+        blinkLed();
+    }
+    return 0;
+}
+
+
+void
+readDateTime()
+{
     SDateTime sDateTime = BQ32000_readDateTime();
     UARTprintf("Second: %d \n", sDateTime.second);
     delay_ms(1000);
@@ -80,13 +85,13 @@ void isr_uartrx(void *args)
     UARTprintf("Rx data: %s \n", data);
 }
 
-void blinkLed(){
+void blinkLed()
+{
     digital_write(LED, LOW);
     delay_ms(1000);
     digital_write(LED, HIGH);
     delay_ms(1000);
 }
 
-#endif
 
 
