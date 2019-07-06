@@ -3,6 +3,16 @@
  *
  *  Created on: Dec 2, 2018
  *      Author: truongtx
+ * Description: Msp430 provide two timer A 16bit A0 and A1
+ *
+ * Timer mode:
+ * Up: TAR register count up from 0 to TACCR0, -> call TIMER0_A1_VECTOR ISR and reset TAR = 0
+ * Continou: the TAR register count up from 0 to 0xFFFF -> call IRS TIMER0_A0_VECTOR
+ * Up/Down: the TAR register count up from 0 to TACCR0 and count down to 0,
+ *
+ *
+ *Interrupt vector: TIMER0_A1_VECTOR - CCR1, CCR2, TAIF vector
+ *                  TIMER0_A0_VECTOR _ CCR0 vector
  */
 
 #include "hcsr04.h"
@@ -12,7 +22,7 @@
 unsigned int up_counter;
 volatile unsigned int distance_cm;
 
-#pragma vector=TIMER1_A0_VECTOR
+#pragma vector=TIMER1_A0_VECTOR // CCR0 interrupt vector
 __interrupt void TimerA0(void)
 {
     if (TA1CCTL0 & CCI)            // Raising edge
@@ -27,11 +37,13 @@ __interrupt void TimerA0(void)
     TA1CTL &= ~TAIFG;           // Clear interrupt flag - handled
 }
 
-void HCSR04_init(uint8_t ssTrig){
-    /* Set P2.3 to input direction (echo)
+void
+HCSR04_init()
+{
+    /* Set P2.0 to input direction (echo)
       input for Timer A1 - Compare/Capture input */
     P2DIR &= ~BIT0;
-    // Select P2.3 as timer trigger input select (echo from sensor)
+    // Select P2.0 as timer trigger input select (echo from sensor)
     P2SEL = BIT0;
 
     /* set P2.4 to output direction (trigger) */

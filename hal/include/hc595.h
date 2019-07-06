@@ -3,6 +3,12 @@
  *
  *  Created on: Oct 17, 2018
  *      Author: truongtx
+ *
+ *  MSP430 master communicate with the HC595 by SPI protocol;
+ *
+ *  MOSI - P1.7
+ *  SCK -  P1.4
+ *  STRB - the other GPIO
  */
 
 #ifndef HAL_INCLUDE_HC595_H_

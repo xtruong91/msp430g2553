@@ -5,12 +5,15 @@
  *      Author: truongtx
  */
 
-#ifndef APP_SRC_MAIN_C_
-#define APP_SRC_MAIN_C_
+#include "rovercar.h"
 
 int main()
 {
-    while(1);
-}
+    Car_init();
 
-#endif /* APP_SRC_MAIN_C_ */
+    while(1)
+    {
+        Car_run();
+        delay_ms(1000);
+    }
+}

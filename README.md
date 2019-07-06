@@ -13,6 +13,10 @@
 ## Project Structure  
 
 1. App - which define  interface for user application
+	- Auto Car
+		1. detect obstacles and measure the distance, then display value on the 7-Segment LED.
+		2. Drive by the Application on smartphone via the bluetooth such as turn left, right, up, down ...
+		3. Change motor speed by H-Bridge circuit.
 2. Bootloader - which is small boot program use to trigger and flash binary data into the microcontroller
 3. Driver - has role enable peripheral module of MSP430 such as SRAM, Flash, GPIO, 
 	TIMER, Watchdog, PWM, UART, I2C, SPI.

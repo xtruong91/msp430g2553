@@ -19,7 +19,6 @@
 #define P1_2        2
 #define P1_3        3
 #define P1_4        4
-#define P1_5        5
 #define P1_6        6
 #define P1_7        7
 #define P2_0        8
