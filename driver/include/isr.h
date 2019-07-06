@@ -11,27 +11,19 @@
 #include "ring_buffer.h"
 #include "type.h"
 
+#define ARRAY_SIZE(array) (sizeof(array)/sizeof(array[0]))
+#define ENDMARKED     '!'
 // ring-buffer for usca1 module
-extern rbd_t g_rbd1;
-extern char g_rbmem1[BUFFER_LENGTH];
+extern rbd_t g_rbuart;
+extern rb_attr_t g_rbuartAttr;
+
 
 //ring buffer for usca2 module;
-extern rbd_t g_rbd2;
-extern char g_rbmem2[BUFFER_LENGTH];
+extern rbd_t g_rbusca2;
+extern rb_attr_t g_rbusca2Attr;
 
-typedef enum{
-    RX_UART,
-    RX_SPI,
-    RX_I2C
-}EModule;
+extern CallBack ISRCallback;
 
-typedef struct {
-    EModule module;
-    void (*cbFunction)(void *arg);
-} isr_config;
-
-void subscribe(const isr_config *config);
-void unsubscribe(const isr_config *config);
 
 
 #endif /* DRIVER_ISR_H_ */

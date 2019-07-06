@@ -20,6 +20,9 @@
 #include <stdlib.h>
 #include "type.h"
 
+#define I2CBUFF_LENGTH 100
+
+int8_t i2cbuffer[I2CBUFF_LENGTH];
 /* I2C slave device structure */
 
 typedef enum{

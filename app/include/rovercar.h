@@ -10,6 +10,8 @@
 
 #include "helper.h"
 #include "gpio.h"
+#include "l298n.h"
+
 
 #define STRTB       P1_0
 #define BAUDRATE    9600
@@ -17,6 +19,7 @@
 #define DEBUG
 
 
+extern L298Config l298Config;
 /*
  * Initialize all module;
  * @Return: Ret is failure or success

@@ -11,7 +11,7 @@
 
 
 static ESpiType _eType;
-static isr_config _isrConfig;
+
 void spi_init(spi_config* config)
 {
     _eType = config->eType;
@@ -104,9 +104,6 @@ void spi_enableRxISR(void (*cbRxHandler)(void *args))
         IE2 |= UCB0RXIE;
     }
     __bis_SR_register(GIE);
-    _isrConfig.module       = RX_SPI;
-    _isrConfig.cbFunction   = cbRxHandler;
-    subscribe(&_isrConfig);
 }
 
 
@@ -118,7 +115,6 @@ void spi_disableRxISR()
     }else{
         IE2 &= ~UCB0RXIE;
     }
-    unsubscribe(&_isrConfig);
 }
 
 static int8_t spiA_getc(){
@@ -150,11 +146,13 @@ int8_t spi_gets(int8_t *buffer, uint8_t length){
 }
 
 
-static void spiA_putc(const int8_t data){
+static void spiA_putc(const int8_t data)
+{
     while (!(IFG2 & UCA0TXIFG));              // USCI_A0 TX buffer ready?
     UCA0TXBUF = data;
 }
-static void spiB_putc(const int8_t data){
+static void spiB_putc(const int8_t data)
+{
     while (!(IFG2 & UCB0TXIFG));              // USCI_B0 TX buffer ready?
     UCB0TXBUF = data;
 }

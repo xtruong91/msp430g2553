@@ -8,23 +8,37 @@
 #include "hc06.h"
 #include "isr.h"
 #include "uart.h"
+#include "debug.h"
+
+static void recvDataHandle(void *args);
+uart_config_t config = {R_9600};
 
 int8_t
 HC06_init()
 {
-    uart_config_t config = {9600};
-    return uart_init(&config);
+    uart_init(&config);
+    setObserver(recvDataHandle);
+    return 0;
 }
 
 void
 HC06_send(int8_t* buffer)
 {
-    if(buffer == '\0')
+    if(buffer == NULL)
         return;
     uart_puts(buffer);
 }
-void HC06_enableRxISR(void (*cbRxHandler)(void* args)){
-    uart_enableRXInt(cbRxHandler);
-}
 
+
+void recvDataHandle(void *args)
+{
+    rbd_t *rbID = (rbd_t*)(args);
+    int8_t data;
+
+    while(ring_buffer_get(*rbID,&data) == TRUE)
+    {
+        UARTprintf("%c", data);
+    }
+
+}
 

@@ -43,7 +43,7 @@ void bootloader_main()
     isBootMode = 1;
     initSystemClock();
     initTimer();
-    uart_config_t config = {9600};
+    uart_config_t config = {R_9600};
     uart_init(&config);
     flash_init();
     _EINT();

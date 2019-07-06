@@ -18,16 +18,29 @@
 #define DRIVER_INCLUDE_UART_H_
 
 #include "type.h"
+#include "ring_buffer.h"
 
-#define ARRAY_SIZE(array) (sizeof(array)/sizeof(array[0]))
+#define BUFFER_LENGTH   128
 
 /* Macro to ignore unused parameters */
 #define IGNORE(p)         ((void) p)
 
+typedef enum
+{
+    R_9600 = 9600,
+    R_19200 = 19200
+}Baudrate;
+
+int8_t buffer[BUFFER_LENGTH];
+
 typedef struct
 {
-    uint32_t baud;
+    Baudrate baud;
 } uart_config_t;
+
+
+
+void setObserver(CallBack callback);
 
 /**
  * \brief Initialize the UART peripheral
@@ -35,12 +48,6 @@ typedef struct
  * \return 0 on success, -1 otherwise
  */
 int8_t uart_init(uart_config_t *config);
-
-/*Enable interrupt receive data and transmit data*/
-void uart_enableRXInt(void (*cbRxHandler)(void *args));
-
-/*Disable interrupt*/
-void uart_disableRXInt();
 
 /**
  * \brief Read a character from UART

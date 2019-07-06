@@ -12,6 +12,7 @@
 #include "debug.h"
 #include "clock.h"
 
+L298Config l298Config = {P2_1, P2_2, P2_3, P2_5};
 
 Ret Car_init()
 {
@@ -23,10 +24,11 @@ Ret Car_init()
     // initialize 7seg led; MOSI - P1.7, SCK -  P1.5, STRB - P1.0
     HC595_init(STRTB);
     // setup Bluetooth.TXD -P1.1(RXD),RXD - P1.2(TXD)
-    //HC06_init();
+    HC06_init();
 #ifdef DEBUG
     UARTStdioConfig(BAUDRATE);
 #endif
+    L298_init(&l298Config);
     return SUCCESS;
 }
 /*
@@ -46,13 +48,14 @@ Ret Car_run()
 //    HC06_send("distance:  \n");
 //    HC06_send(distance/10 + 0x30);
 //    HC06_send(distance%10 + 0x30);
+    L298_drive(Up);
 
     return SUCCESS;
 }
 
 Ret Car_stop()
 {
-
+    return SUCCESS;
 }
 
 

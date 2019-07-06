@@ -9,11 +9,13 @@
 #include "isr.h"
 #include <msp430.h>
 
+rbd_t g_rbusca2 = 2;
+rb_attr_t g_rbusca2Attr = {sizeof(i2cbuffer[0]), ARRAY_SIZE(i2cbuffer), i2cbuffer};
+
 static int _transmit(const int8_t dev, const uint8_t *buf, size_t nbytes);
 static int _receive(const int8_t dev, uint8_t *buf, size_t nbytes);
 static int _check_ack(const int8_t dev);
 
-static isr_config isrConfig;
 /**
  * \brief Initialize the I2C peripheral
  * \return 0 on success, -1 otherwise
@@ -45,23 +47,17 @@ void i2c_init(const i2c_config* config)
     /* Take USCI_B0 out of reset and source clock from SMCLK */
     UCB0CTL1 |= UCSSEL_2;
     UCB0CTL1 &= ~UCSWRST;
-}
 
-void i2c_enableRxISR(void (*cbRxHandler)(void *args))
-{
     IE2 |= UCB0TXIE;                          // Enable TX interrupt
     __bis_SR_register(GIE);
-    isrConfig.module = RX_I2C;
-    isrConfig.cbFunction = cbRxHandler;
-    subscribe(&isrConfig);
 }
+
 /*
  * Disable global interrupt
  * */
 void i2c_disableRxISR()
 {
     IE2 &= ~UCB0TXIE;
-    unsubscribe(&isrConfig);
 }
 
 void i2c_setAddress(uint8_t address){
@@ -282,7 +278,8 @@ static int _receive(const int8_t dev, uint8_t *buf, size_t nbytes)
     err = _check_ack(dev);
 
     /* If no error and bytes left to receive, receive the data */
-    while ((err == 0) && (nbytes > 0)) {
+    while ((err == 0) && (nbytes > 0))
+    {
         /* Wait for the data */
         while ((IFG2 & UCB0RXIFG) == 0);
 

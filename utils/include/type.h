@@ -75,6 +75,8 @@ typedef union _union16 {
   uint8_t u8[2];
 } union16;
 
+typedef void (*CallBack)(void *args);
+
 /* A union type for byte, word, or dword access for 32 bit values.  */
 typedef union _union32 {
   uint32_t u32;
@@ -351,9 +353,6 @@ typedef enum _bool {
 
 /*****************************************************************************/
 
-
-
-typedef void (*CallBack)(void *args);
 
 
 #endif /* DRIVER_TYPE_H_ */

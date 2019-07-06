@@ -12,8 +12,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define BUFFER_LENGTH  8
-
 /* Ring buffer descriptor */
 typedef unsigned int rbd_t;
 

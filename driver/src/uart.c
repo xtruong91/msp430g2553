@@ -5,25 +5,17 @@
 #include <stddef.h>
 #include <msp430.h>
 
-struct baud_value
+rbd_t g_rbuart = 1;
+
+rb_attr_t g_rbuartAttr = {sizeof(buffer[0]), ARRAY_SIZE(buffer), buffer};
+
+CallBack ISRCallback = NULL;
+
+void setObserver(CallBack callback)
 {
-    uint32_t baud;
-    uint16_t UCAxBR0;
-    uint16_t UCAxBR1;
-    uint16_t UCAxMCTL;
-};
+    ISRCallback = callback;
+}
 
-#ifdef RINGBUFF
-/* Table of baud rate register values from reference manual (SLAU144) */
-static const struct baud_value _baud_tbl[] = {
-    {9600, 104, 0, 0x2}
-};
-
-/* RX ring bufer */
-extern rbd_t g_rbd1;
-extern char g_rbmem1[BUFFER_LENGTH];
-
-#endif
 /**
  * \brief Initialize the UART peripheral
  * \param[in] config - the UART configuration
@@ -32,57 +24,35 @@ extern char g_rbmem1[BUFFER_LENGTH];
 int8_t uart_init(uart_config_t *config)
 {
     int status = -1;
-
-    P1SEL |= BIT1 + BIT2 ;                     // Set P1.1 as RXD
-    P1SEL2 |= BIT1 + BIT2 ;                    // Set P1.2 as TXD
-#ifdef RINGBUFF
-    /* USCI should be in reset before configuring - only configure once */
-    if (UCA0CTL1 & UCSWRST) {
-        size_t i;
-
+    // USCI should be in reset before configuring - only configrure once
+    if(UCA0CTL1 & UCSWRST)
+    {
+        P1SEL |= BIT1 + BIT2 ;                     // Set P1.1 as RXD
+        P1SEL2 |= BIT1 + BIT2 ;                    // Set P1.2 as TXD
         /* Set clock source to SMCLK */
         UCA0CTL1 |= UCSSEL_2;
 
-        /* Find the settings from the baud rate table */
-        for (i = 0; i < ARRAY_SIZE(_baud_tbl); i++) {
-            if (_baud_tbl[i].baud == config->baud) {
-                break;
-            }
+        if(config->baud == R_19200 )
+        {
+            UCA0BR0 = 52;                             // 1MHz 19200
+            UCA0BR1 = 0;                              // 1MHz 19200
+        }else
+        {
+            UCA0BR0 = 104;                            // 1MHz 9600
+            UCA0BR1 = 0;                              // 1MHz 9600
         }
+        UCA0MCTL = UCBRS0;                        // Modulation UCBRSx = 1
+        UCA0CTL1 &= ~UCSWRST;                     // **Initialize USCI state machine**
 
-        if (i < ARRAY_SIZE(_baud_tbl)) {
-            rb_attr_t attr = {sizeof(g_rbmem1[0]), ARRAY_SIZE(g_rbmem1), g_rbmem1};
-
-            /* Set the baud rate */
-            UCA0BR0 = _baud_tbl[i].UCAxBR0;
-            UCA0BR1 = _baud_tbl[i].UCAxBR1;
-            UCA0MCTL = _baud_tbl[i].UCAxMCTL;
-
-            /* Initialize the ring buffer */
-            if (ring_buffer_init(&g_rbd1, &attr) == 0) {
-                /* Enable the USCI peripheral (take it out of reset) */
-                UCA0CTL1 &= ~UCSWRST;
-
-                /* Enable rx interrupts */
-                IE2 |= UCA0RXIE;
-
-                status = 0;
-            }
+        // init ringbuffer;
+        /* Initialize the ring buffer */
+        if (ring_buffer_init(&g_rbuart, &g_rbuartAttr) == TRUE)
+        {
+            /* Enable rx interrupts */
+            IE2 |= UCA0RXIE + GIE;
+            status = 0;
         }
     }
-#else
-    UCA0CTL1 |= UCSSEL_2;                     // SMCLK
-    if(config->baud == 19200 ){
-        UCA0BR0 = 52;                             // 1MHz 19200
-        UCA0BR1 = 0;                              // 1MHz 19200
-    }else{
-        UCA0BR0 = 104;                            // 1MHz 9600
-        UCA0BR1 = 0;                              // 1MHz 9600
-    }
-    UCA0MCTL = UCBRS0;                        // Modulation UCBRSx = 1
-    UCA0CTL1 &= ~UCSWRST;                     // **Initialize USCI state machine**
-    status = 0;
-#endif
 
     return status;
 }
@@ -94,7 +64,9 @@ void uart_getc(char *ch)
     *ch = UCA0RXBUF;
     IFG2 &= ~UCA0RXIFG;
 }
-void uart_getchars(char *str, unsigned int length)
+
+void
+uart_getchars(char *str, unsigned int length)
 {
     unsigned int index;
     char temp;
@@ -105,8 +77,6 @@ void uart_getchars(char *str, unsigned int length)
     while (1)
     {
         uart_getc(&temp);
-        uart_getc(temp);
-
         if (temp == '\r')
         {
             uart_putchar('\n');
@@ -123,27 +93,12 @@ void uart_getchars(char *str, unsigned int length)
     str[index] = '\0';
 }
 
-void uart_enableRXInt(void (*cbRxHandler)(void *args))
-{
-    IE2 |= UCA0RXIE;
-    __bis_SR_register(GIE);
-
-//    isrConfig.module = RX_UART;
-//    isrConfig.cbFunction = cbRxHandler;
-//    subscribe(&isrConfig);
-}
-
-/*Disable interrupt*/
-void uart_disableRXInt()
-{
-    IE2 &= ~UCA0RXIE;
-    //unsubscribe(&isrConfig);
-}
 /**
  * \brief Read a character from UART
  * \return the character read on success, -1 if nothing was read
  */
-int8_t uart_getchar(void)
+int8_t
+uart_getchar(void)
 {
     int retval = -1;
 #ifdef RINGBUFF
@@ -178,7 +133,8 @@ int8_t uart_putchar(int8_t c)
  * \brief Write a string to UART
  * \return 0 on sucesss, -1 otherwise
  */
-int8_t uart_puts(const int8_t *str)
+int8_t
+uart_puts(const int8_t *str)
 {
     int status = -1;
 

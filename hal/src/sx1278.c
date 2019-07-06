@@ -46,11 +46,11 @@ void sx1278_setMode(ELoraMode mode){
     }
 }
 void sx1278_enableRxISR(void (*cbRxHandler)(void *args)){
-    uart_enableRXInt(cbRxHandler);
+    //uart_enableRXInt(cbRxHandler);
 }
 
 void sx1278_disableRxISR(){
-    uart_disableRXInt();
+    //uart_disableRXInt();
 }
 
 void sx1278_send(const int8_t *data, uint8_t length){
