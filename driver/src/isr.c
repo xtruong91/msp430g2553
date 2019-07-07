@@ -69,6 +69,7 @@ __interrupt void USCI0RX_ISR(void)
         {
             return;
         }
+
         if(data == ENDMARKED)
         {
             notify();

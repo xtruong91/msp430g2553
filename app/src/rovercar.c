@@ -14,6 +14,32 @@
 
 L298Config l298Config = {P2_1, P2_2, P2_3, P2_5};
 
+void handleMessage(void *args)
+{
+    int8_t *data = (int8_t*)args;
+
+    if(*data == 'w')
+    {
+        L298_drive(Up);
+
+    }else if(*data  == 'x')
+    {
+        L298_drive(Down);
+
+    }else if(*data == 'a')
+    {
+        L298_drive(Left);
+
+    }else if(*data == 'd')
+    {
+        L298_drive(Right);
+
+    }else if(*data == 's'){
+        L298_drive(Stop);
+    }
+
+}
+
 Ret Car_init()
 {
     // initialize system clock
@@ -25,6 +51,9 @@ Ret Car_init()
     HC595_init(STRTB);
     // setup Bluetooth.TXD -P1.1(RXD),RXD - P1.2(TXD)
     HC06_init();
+
+    HC06_setObserver(handleMessage);
+
 #ifdef DEBUG
     UARTStdioConfig(BAUDRATE);
 #endif
@@ -48,7 +77,7 @@ Ret Car_run()
 //    HC06_send("distance:  \n");
 //    HC06_send(distance/10 + 0x30);
 //    HC06_send(distance%10 + 0x30);
-    L298_drive(Up);
+
 
     return SUCCESS;
 }

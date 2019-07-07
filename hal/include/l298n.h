@@ -31,6 +31,7 @@ typedef enum
     Right,
     Up,
     Down,
+    Stop
 }Navigation;
 
 typedef struct

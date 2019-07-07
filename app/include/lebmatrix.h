@@ -8,12 +8,10 @@
 #ifndef APP_INCLUDE_LEBMATRIX_H_
 #define APP_INCLUDE_LEBMATRIX_H_
 
-extern int LedMatrix_init();
+#include "helper.h"
 
-extern int LedMatrix_run();
+extern Ret LedMatrix_init();
 
-extern void LedMatrix_blinkLed(void);
-
-extern int distance;
+extern Ret LedMatrix_run();
 
 #endif /* APP_INCLUDE_LEBMATRIX_H_ */

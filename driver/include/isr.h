@@ -12,7 +12,9 @@
 #include "type.h"
 
 #define ARRAY_SIZE(array) (sizeof(array)/sizeof(array[0]))
-#define ENDMARKED     '!'
+
+#define ENDMARKED     '.'
+
 // ring-buffer for usca1 module
 extern rbd_t g_rbuart;
 extern rb_attr_t g_rbuartAttr;

@@ -48,8 +48,7 @@ void i2c_init(const i2c_config* config)
     UCB0CTL1 |= UCSSEL_2;
     UCB0CTL1 &= ~UCSWRST;
 
-    IE2 |= UCB0TXIE;                          // Enable TX interrupt
-    __bis_SR_register(GIE);
+    IE2 |= UCB0TXIE + GIE;                          // Enable TX interrupt
 }
 
 /*

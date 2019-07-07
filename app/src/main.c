@@ -6,14 +6,26 @@
  */
 
 #include "rovercar.h"
+#define APPLED
 
 int main()
 {
+
+#ifdef APPCAR
     Car_init();
+#elif defined APPLED
+    LedMatrix_init();
+#endif
+
 
     while(1)
     {
-        Car_run();
-        delay_ms(1000);
+
+#ifdef APPCAR
+       Car_run();
+#elif defined APPLED
+       LedMatrix_run();
+#endif
+
     }
 }

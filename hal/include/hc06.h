@@ -9,7 +9,9 @@
  *      current: 20-30mA
  *      baudRate: 9600
  *
+ *  protocol receive data via bluetooth
  *
+ *   | Preamble(!) | ID | Length | Data | CRC |
  */
 
 #ifndef HAL_INCLUDE_HC06_H_
@@ -18,10 +20,21 @@
 #include "type.h"
 #include "uart.h"
 
+#define PREAMBLE    '!'
+
+typedef enum
+{
+    INVALID_RX,
+    INVALID_PREAMBLE,
+    INVALID_LENGTH,
+    VALID
+}RetCode;
 
 int8_t HC06_init();
 
 void HC06_send(int8_t* buffer);
+
+void HC06_setObserver(CallBack cbRecv);
 
 
 #endif /* HAL_INCLUDE_HC06_H_ */
