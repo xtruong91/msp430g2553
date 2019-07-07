@@ -19,7 +19,7 @@
 		3. Change motor speed by H-Bridge circuit.
 	- LED wifi
 		1. Display data on the led matrix
-		2. Control display by the WEB UI via ESP8266
+		2. Control display by the WEB UI via ESP8266 (MSP430 communicate with ESP8266 by UART)
 		3. Remote Control via LoRa.	
 	- PID Algorithm
 2. Bootloader - which is small boot program use to trigger and flash binary data into the microcontroller

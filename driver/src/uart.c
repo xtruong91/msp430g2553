@@ -49,8 +49,8 @@ int8_t uart_init(uart_config_t *config)
         if (ring_buffer_init(&g_rbuart, &g_rbuartAttr) == TRUE)
         {
             /* Enable rx interrupts */
-            IE2 |= UCA0RXIE + GIE;
-            status = 0;
+            IE2 |= UCA0RXIE;
+            __bis_SR_register(GIE);
         }
     }
 

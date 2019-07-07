@@ -11,13 +11,13 @@
 #include "debug.h"
 
 static void recvDataHandle(void *args);
-uart_config_t config = {R_9600};
+uart_config_t g_config = {R_9600};
 CallBack _cbRecv = NULL;
 
 int8_t
 HC06_init()
 {
-    uart_init(&config);
+    uart_init(&g_config);
     setObserver(recvDataHandle);
     return 0;
 }

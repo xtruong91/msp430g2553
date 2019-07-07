@@ -57,7 +57,7 @@ __interrupt void USCI0RX_ISR(void)
     }
 #endif // end of module UCA0
 
-#if defined ( SPI2_EN )
+#if !defined ( SPI2_EN )
     // defined SPI2
     if( UC0IFG & UCB0RXIFG)
     {
@@ -75,7 +75,7 @@ __interrupt void USCI0RX_ISR(void)
             notify();
         }
     }
-#elif defined (I2C_EN)
+#elif !defined (I2C_EN)
     if (UCB0STAT & UCSTTIFG)
     {
         i2c_rx_address = 0;

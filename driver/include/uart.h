@@ -39,6 +39,7 @@ typedef struct
 } uart_config_t;
 
 
+extern uart_config_t g_config;
 
 void setObserver(CallBack callback);
 
