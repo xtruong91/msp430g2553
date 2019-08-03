@@ -14,7 +14,7 @@
 
 ### Hardware 
 
-![Architecture Hardware](https://raw.githubusercontent.com/truongtx91/msp430-platform/master/doc/hardware.PNG)
+![Architecture Hardware](doc/hardware.PNG?raw=true)
   
 ### Software
 
