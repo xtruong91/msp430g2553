@@ -5,12 +5,12 @@
  *      Author: truongtx
  */
 
-#include "rovercar.h"
-#include "hcsr04.h"
-#include "hc595.h"
-#include "hc06.h"
 #include "debug.h"
+#include "hc06.h"
+#include "hc595.h"
+#include "hcsr04.h"
 #include "clock.h"
+#include "rovercar.h"
 
 L298Config l298Config = {P2_1, P2_2, P2_3, P2_5};
 

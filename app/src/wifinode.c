@@ -5,10 +5,10 @@
  *      Author: truongtx
  */
 
-#include "CompileOption.h"
-#include "clock.h"
 #include "debug.h"
 #include "esp8266.h"
+#include "clock.h"
+#include "CompileOption.h"
 #include "wifinode.h"
 
 void callbackUART(void *args)

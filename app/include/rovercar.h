@@ -8,9 +8,9 @@
 #ifndef APP_INCLUDE_ROVERCAR_H_
 #define APP_INCLUDE_ROVERCAR_H_
 
-#include "helper.h"
-#include "gpio.h"
 #include "l298n.h"
+#include "gpio.h"
+#include "helper.h"
 
 
 #define STRTB       P1_0

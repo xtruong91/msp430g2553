@@ -17,7 +17,6 @@ int main()
     LedMatrix_init();
 #endif
 
-
     while(1)
     {
 

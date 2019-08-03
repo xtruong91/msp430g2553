@@ -9,16 +9,15 @@
 #ifndef APP_INCLUDE_CENTRALCIRCUIT_H_
 #define APP_INCLUDE_CENTRALCIRCUIT_H_
 
-#include "clock.h"
-#include "ConfigChip.h"
-
 #include "bq32000.h"
+#include "debug.h"
 #include "hc06.h"
 #include "hc595.h"
 #include "sx1278.h"
-#include "debug.h"
-#include "gpio.h"
 #include "clock.h"
+#include "gpio.h"
+#include "ConfigChip.h"
+
 
 #define LED P1_0
 

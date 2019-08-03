@@ -5,9 +5,9 @@
  *      Author: truongtx
  */
 
+#include <drivers/include/flash.h>
+#include <drivers/include/uart.h>
 #include "bootloader.h"
-#include "uart.h"
-#include "flash.h"
 #include "helper.h"
 #include "type.h"
 
